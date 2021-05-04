@@ -1,7 +1,11 @@
-import 'package:expenses/models/transaction.dart';
+import 'dart:math';
+
+import 'package:expenses/components/transaction_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:intl/intl.dart';
+
+import 'components/transaction_list.dart';
+import 'models/transaction.dart';
 
 main() => runApp(ExpensesApp());
 
@@ -19,10 +23,12 @@ class ExpensesApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  final titleController = TextEditingController();
-  final valueController = TextEditingController();
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
 
+class _MyHomePageState extends State<MyHomePage> {
   final _transactions = [
     Transaction(
       id: 't1',
@@ -36,95 +42,69 @@ class MyHomePage extends StatelessWidget {
       value: 211,
       date: DateTime.now(),
     ),
+    Transaction(
+      id: 't3',
+      title: 'the Last of Us 3',
+      value: 200,
+      date: DateTime.now(),
+    ),
   ];
+
+  _addTransaction(String titleParam, double valueParam) {
+    final newTransaction = Transaction(
+      id: Random().nextDouble().toString(),
+      title: titleParam,
+      value: valueParam,
+      date: DateTime.now(),
+    );
+
+    setState(() {
+      _transactions.add(newTransaction);
+    });
+
+    Navigator.of(context).pop();
+  }
+
+  _openTransactionFormModal(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (_) {
+          return TransactionForm(_addTransaction);
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Despesas Pessoais'),
-      ),
-      body: Column(
-        // mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Container(
-            // width: double.infinity,
-            child: Card(
-              child: Text('Gráfico'),
-            ),
-          ),
-          Column(
-            children: _transactions.map((tr) {
-              return Card(
-                  child: Row(
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                    decoration: BoxDecoration(
-                        border:
-                            Border.all(color: Colors.purple[300], width: 2)),
-                    padding: EdgeInsets.all(10),
-                    child: Text(
-                      'R\$ ${tr.value.toStringAsFixed(2)}',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: Colors.purple[800]),
-                    ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        tr.title,
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        DateFormat(DateFormat.YEAR_MONTH_DAY, 'pt_Br')
-                            .format(tr.date),
-                        style: TextStyle(color: Colors.grey[600]),
-                      )
-                    ],
-                  ),
-                ],
-              ));
-            }).toList(),
-          ),
-          Card(
-            elevation: 5,
-            child: Container(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                children: <Widget>[
-                  TextField(
-                    controller: titleController,
-                    decoration: InputDecoration(labelText: 'Título'),
-                  ),
-                  TextField(
-                    controller: valueController,
-                    decoration: InputDecoration(labelText: 'Valor (R\$)'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      print(titleController.text);
-                    },
-                    child: Text(
-                      'Nova Transação',
-                      // style: TextStyle(color: Colors.purple[600]),
-                    ),
-                    style: TextButton.styleFrom(
-                        elevation: 4,
-                        primary: Colors.purple,
-                        backgroundColor: Colors.white),
-                  )
-                ],
-              ),
-            ),
-          ),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.add_circle_outline),
+            onPressed: () => _openTransactionFormModal(context),
+          )
         ],
       ),
+      body: SingleChildScrollView(
+        child: Column(
+          // mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Container(
+              // width: double.infinity,
+              child: Card(
+                child: Text('Gráfico'),
+              ),
+            ),
+            TransactionList(_transactions),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () => _openTransactionFormModal(context),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
