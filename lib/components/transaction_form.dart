@@ -1,5 +1,9 @@
+import 'package:expenses/components/adaptative_button.dart';
+import 'package:expenses/components/adaptative_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
+import 'adaptative_date_picker.dart';
 
 class TransactionForm extends StatefulWidget {
   final void Function(String, double, DateTime) onSubmit;
@@ -29,79 +33,45 @@ class _TransactionFormState extends State<TransactionForm> {
     widget.onSubmit(title, value, this._selectedDate);
   }
 
-  _showDatePicker() {
-    showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2019),
-      lastDate: DateTime.now(),
-    ).then((value) {
-      setState(() {
-        this._selectedDate = value;
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 5,
-      child: Container(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: <Widget>[
-            TextField(
-              onSubmitted: (_) => _submitForm(),
-              controller: _titleController,
-              decoration: InputDecoration(labelText: 'Título'),
-            ),
-            TextField(
-              onSubmitted: (_) => _submitForm(),
-              controller: _valueController,
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(labelText: 'Valor (R\$)'),
-            ),
-            Container(
-              child: Row(
+    return SingleChildScrollView(
+      child: Card(
+        elevation: 5,
+        child: Padding(
+          padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 10),
+          child: Column(
+            children: <Widget>[
+              AdaptativeTextField(
+                onSubmitted: (_) => _submitForm(),
+                controller: _titleController,
+                label: 'Título',
+              ),
+              AdaptativeTextField(
+                onSubmitted: (_) => _submitForm(),
+                controller: _valueController,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                label: 'Valor (R\$)',
+              ),
+              AdaptativeDatePicker(
+                selectedDate: this._selectedDate,
+                onDateChanged: (newDate) {
+                  setState(() {
+                    _selectedDate = newDate;
+                  });
+                },
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  Expanded(
-                    child: Text(this._selectedDate == null
-                        ? 'Nenhuma data selecionada!'
-                        : DateFormat('dd/MM/y', 'pt-Br')
-                            .format(this._selectedDate)),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      this._showDatePicker();
-                    },
-                    child: Text(
-                      'Alterar Data',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                  AdaptativeButton(
+                    label: 'Nova Transação',
+                    onPressed: _submitForm,
                   ),
                 ],
               ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    _submitForm();
-                  },
-                  child: Text(
-                    'Nova Transação',
-                    // style: TextStyle(color: Colors.purple[600]),
-                  ),
-                  style: TextButton.styleFrom(
-                    elevation: 4,
-                    primary: Theme.of(context).textTheme.button.color,
-                    backgroundColor: Theme.of(context).primaryColor,
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
