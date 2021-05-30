@@ -1,6 +1,6 @@
+import 'package:expenses/components/transaction_item.dart';
 import 'package:expenses/models/transaction.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class TransactionList extends StatelessWidget {
   final List<Transaction> transactions;
@@ -35,53 +35,28 @@ class TransactionList extends StatelessWidget {
               );
             },
           )
-        : ListView.builder(
-            itemCount: transactions.length,
-            itemBuilder: (ctx, index) {
-              final tr = transactions[index];
-              return Card(
-                elevation: 5,
-                margin: EdgeInsets.symmetric(
-                  vertical: 5,
-                  horizontal: 20,
-                ),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    radius: 30,
-                    child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: FittedBox(
-                        child: Text('R\$${tr.value}'),
-                      ),
-                    ),
-                  ),
-                  title: Text(
-                    tr.title,
-                    style: Theme.of(context).textTheme.headline6,
-                  ),
-                  subtitle: Text(
-                    DateFormat('d MMM y', 'pt-Br').format(tr.date),
-                  ),
-                  trailing: MediaQuery.of(context).size.width > 480
-                      ? TextButton.icon(
-                          onPressed: () => onRemove(tr.id),
-                          icon: Icon(Icons.delete),
-                          style: TextButton.styleFrom(
-                              primary: Theme.of(context).errorColor),
-                          label: Text(
-                            'Excluir',
-                          ),
-                        )
-                      : IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            this.onRemove(tr.id);
-                          },
-                          color: Theme.of(context).errorColor,
-                        ),
-                ),
+        :
+        // This manner to handle ListView is used once you need to control its
+        // states in a Stateless Widget (List). In this case we'll use key
+        //  to attach an element with its corresponding widget.
+        ListView(
+            children: transactions.map((transaction) {
+              return TransactionItem(
+                //Sets a fix value to a key to help it keeps its state even when
+                //the widget changes
+                key: ValueKey(transaction.id),
+                tr: transaction,
+                onRemove: onRemove,
               );
-            },
+            }).toList(),
           );
+    //  ListView.builder(
+    //     itemCount: transactions.length,
+    //     itemBuilder: (ctx, index) {
+    //       final tr = transactions[index];
+    //GlobalObjectKey is more expensive in terms of performance than ValueKey
+    //       return TransactionItem(key: GlobalObjectKey(tr), tr: tr, onRemove: onRemove,);
+    //     },
+    //   );
   }
 }
